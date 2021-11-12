@@ -53,7 +53,7 @@ password:输入密码
 
 ### 更新为国内镜像源
 
-`reflector --country China --age 24 --sort rate --protocol https --save /etc/pacman.d/mirrorlist`
+`reflector --country China --age 72 --sort rate --protocol https --save /etc/pacman.d/mirrorlist`
 
 已将最新的镜像源更新为国内的，保存在/etc/pacman.d/mirrorlist目录下
 
@@ -122,7 +122,7 @@ lsblk -f    ## 查看分区g情况
 ### 安装系统
 
 ```
-pacstrap /mnt linux liinux-firmware linux-headers base base-devel vim git bash-completion
+pacstrap /mnt linux linux-firmware linux-headers base base-devel vim git bash-completion
 ```
 
 ### 生成文件系统的表文件
