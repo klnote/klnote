@@ -1,6 +1,6 @@
 首先通过安装介质启动到live环境。选第一个
 
-![image-20211111162907663](C:\Users\klelee\AppData\Roaming\Typora\typora-user-images\image-20211111162907663.png)
+![](boot选项.png)
 
 会以root身份进入一个虚拟控制台中，默认的shell是zsh。
 
@@ -8,7 +8,7 @@
 
 `ls /sys/firmware/efi/efivars` 如果结果显示了目录且没有报告错误，则系统是以 UEFI 模式引导的。
 
-![image-20211111163102686](C:\Users\klelee\AppData\Roaming\Typora\typora-user-images\image-20211111163102686.png)
+![](启动方式确认.png)
 
 ### 连接到因特网
 
@@ -59,14 +59,33 @@ password:输入密码
 
 ### 磁盘分区
 
-安装archlinux至少需要两个分区，EFI分区（推荐分出300M）和root（剩余空间）分区，很多时候也会选择分出swap分区（内存大小的2倍，最多8g就可以了）来，分区工具使用fdisk。
+安装archlinux所需分区
 
 ```
-# fdisk
-EFI 类型选择EFI system
-swap 类型选择Swap 
-Root 类型选择Linux Filesystem
+EFI分区		300 MB
+swap分区		4GB
+root分区		剩余空间
 ```
+
+使用cfdisk工具分区 `cfdisk <install disk name >` 比如我的： `cfdisk /dev/sda` 。之后会进入如下界面，选择gpt分区表：
+
+![](分区表类型.png)
+
+之后就开始正式分区了，首先EFI分区，点击new新建：
+
+![](新建分区new.png)
+
+这里输入300M，之后回车，就回到上面的界面了。
+
+![](C:\Users\klelee\Desktop\klnote\Archlinux安装\EFI分区300M.png)
+
+在建立下一个分区之前，先对第一个EFI分区的类型做一个修改，选择type选项
+
+![](./更改EFI分区类型.png)
+
+重复之前的步骤，建立swap分区和root分区，完成之后如下图：
+
+![](./分完区之后.png)
 
 ### 格式化分区
 
@@ -88,7 +107,7 @@ mkfs.xfs /dev/sda3
 mkswap /dev/sda2
 ```
 
-可以使用`lsblk` 查看磁盘分区情况
+可以使用`lsblk -f`  查看磁盘分区情况
 
 ### 挂在分区
 
@@ -97,7 +116,7 @@ mount /dev/sda3 /mnt
 mkdir -p /mnt/boot/efi
 mount /dev/vda1 /mnt/boot/efi
 swapon /dev/sda2
-lsblk 
+lsblk -f    ## 查看分区g情况 
 ```
 
 ### 安装系统
