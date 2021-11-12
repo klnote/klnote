@@ -51,6 +51,24 @@ password:输入密码
 
 ` timedatectl set-ntp true ` 之后可以使用 ` timedatectl status `检查服务状态
 
+### 通过ssh链接当前主机（可选）
+
+可以通过ssh在另外一台可以正常使用的设备上进行安装，方便命令复制
+
+1. 在当前安装环境下输入`passwd` 为当前环境设置一个密码，不用太长，两三位就可以了。输入时不会显示。
+
+2. 执行`ip -brief address`查看当前ip地址，一般是192.168.<...>.<...> IP地址后面斜杠之后的掩码位不用哦
+
+3. 准备另外一台设备，应当使该设备与安装主机在同一局域网内，就是俩设备都连着同一个WiFi
+
+   几种设备的连接方式：
+
+   ​	Windows：在终端输入：`ssh -o StrictHostKeyChecking=no root@<刚刚查看的IP地址>`
+
+   ​	Linux&macOS：在终端输入：`ssh -o StrictHostKeyChecking=no root@<刚刚查看的IP地址>`
+
+   ​	当然也可以使用Android和ios设备，这里不说了，因为那玩意太小了，用来输入命令实在鸡肋
+
 ### 更新为国内镜像源
 
 `reflector --country China --age 72 --sort rate --protocol https --save /etc/pacman.d/mirrorlist`
@@ -282,6 +300,57 @@ visudo
 %wheel ALL=(ALL) ALL
 ```
 
+### 添加ArchLinuxCN 存储库
+
+该仓库是由archlinux中文社区驱动的一个非官方的软件仓库。我们使用的很多软件都需要使用这个库去下载，比如typora。
+
+```
+# 编辑/etc/pacman.conf
+vim /etc/pacman.conf
+--------------------------------------
+# 在最后添加
+[archlinuxcn]
+Server = https://ustc.edu.cn/archlinuxcn/$arch   
+# 这是中科大的源，你也可以选择清华、阿里等，当我推荐中科大，因为我喜欢
+```
+
+然后更新GPG密钥
+
+```
+pacman -S archlinuxcn-keyring
+```
+
+**注** ： 如果以上更新密钥步骤出现错误，就是那种连着一串ERROR的情况，请执行以下步骤
+
+```
+rm -rf /etc/pacman.c/gnupg
+pacman-key --init
+pacman-key --populate archlinux archlinuxcn
+pacman -Syy
+```
+
+OK！
+
+### 声卡配置
+
+```
+pacman -S alsa-utils pulseaudio pulseaudio-bluetooth cups
+```
+
+### 清理缓存
+
+```
+pacman -Sc
+```
+
+### 启用每周自动清理pacman缓存
+
+```
+sudo systemctl enable paccache.timer
+```
+
+
+
 ### 图形界面
 
 #### 显示服务
@@ -315,17 +384,5 @@ export FREETYPE_PROPERTIES="truetype:interpreter-version=40"
 
 ```
 pacman -S xf86-video-intel vukan-intel mesa
-```
-
-### 声卡配置
-
-```
-pacman -S alsa-utils pulseaudio pulseaudio-bluetooth cups
-```
-
-### 清理缓存
-
-```
-pacman -Sc
 ```
 
