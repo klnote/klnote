@@ -1,0 +1,331 @@
+首先通过安装介质启动到live环境。选第一个
+
+![](boot选项.png)
+
+会以root身份进入一个虚拟控制台中，默认的shell是zsh。
+
+### 验证引导模式
+
+`ls /sys/firmware/efi/efivars` 如果结果显示了目录且没有报告错误，则系统是以 UEFI 模式引导的。
+
+![](启动方式确认.png)
+
+### 连接到因特网
+
+#### 判断无线网卡是否被锁
+
+```shell
+# rfkill list  
+--------------
+0: phy0: Wireless LAN
+	Soft blocked: yes
+	Hard blocked: yes
+```
+
+如果出现以上内容，可以调节网卡开关打开它。如果没有开关，那就使用以下命令：
+
+```shell
+# rfkill unblock wifi
+```
+
+#### 连接网络
+
+```shell
+$ iwctl   //会进入联网模式
+[iwd]# help    //可以查看帮助
+[iwd]# device list    //列出你的无线设备名称，一般以wlan0命名
+[iwd]# station <device> scan    //扫描当前环境下的网络
+[iwd]# station <device> get-networks    //会显示你扫描到的所有网络
+[iwd]# station <device> connect <network name>
+password:输入密码
+[iwd]# exit    //退出当前模式，回到安装模式
+```
+
+测试网络是否连通：
+
+```
+# ping baidu.com
+```
+
+### 更新系统时间
+
+` timedatectl set-ntp true ` 之后可以使用 ` timedatectl status `检查服务状态
+
+### 更新为国内镜像源
+
+`reflector --country China --age 72 --sort rate --protocol https --save /etc/pacman.d/mirrorlist`
+
+已将最新的镜像源更新为国内的，保存在/etc/pacman.d/mirrorlist目录下
+
+### 磁盘分区
+
+安装archlinux所需分区
+
+```
+EFI分区		300 MB
+swap分区		4GB
+root分区		剩余空间
+```
+
+使用cfdisk工具分区 `cfdisk <install disk name >` 比如我的： `cfdisk /dev/sda` 。之后会进入如下界面，选择gpt分区表：
+
+![](分区表类型.png)
+
+之后就开始正式分区了，首先EFI分区，点击new新建：
+
+![](新建分区new.png)
+
+这里输入300M，之后回车，就回到上面的界面了。
+
+![](C:\Users\klelee\Desktop\klnote\Archlinux安装\EFI分区300M.png)
+
+在建立下一个分区之前，先对第一个EFI分区的类型做一个修改，选择type选项
+
+![](./更改EFI分区类型.png)
+
+重复之前的步骤，建立swap分区和root分区，完成之后如下图：
+
+![](./分完区之后.png)
+
+### 格式化分区
+
+#### EFI分区格式化
+
+```
+mkfs.vfat /dev/sda1
+```
+
+#### root分区格式化
+
+```
+mkfs.xfs /dev/sda3
+```
+
+#### 创建swap分区
+
+```
+mkswap /dev/sda2
+```
+
+可以使用`lsblk -f`  查看磁盘分区情况
+
+### 挂载分区
+
+```
+mount /dev/sda3 /mnt
+mkdir -p /mnt/boot/efi
+mount /dev/vda1 /mnt/boot/efi
+swapon /dev/sda2
+lsblk -f    ## 查看分区g情况 
+```
+
+### 安装系统
+
+```
+pacstrap /mnt linux linux-firmware linux-headers base base-devel vim git bash-completion
+```
+
+### 生成文件系统的表文件
+
+```
+genfstab -U /mnt >> /mnt/etc/fstab
+cat /mnt/etc/fstab
+```
+
+### 进入新系统
+
+```
+arch-chroot /mnt
+```
+
+### 设置时区
+
+```
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+hwclock --systohc
+```
+
+### 本地化
+
+#### 设置系统语言
+
+```
+vim /etc/locale.gen
+```
+
+将以下两行取消注释(删除前面的井号)
+
+```
+en_US.UTF-8 UTF-8
+zh_CN.UTF-8 UTF-8
+```
+
+#### 生成本地语言信息
+
+```
+locale-gen
+```
+
+#### 设置本地语言环境变量
+
+编辑`/etc/locale.conf` 在里面写入：`LANG=en_US.UTF-8`
+
+### 网络配置
+
+#### 主机设置
+
+```
+vim /etc/hostname
+---------------------
+archlinux(也可以写成你想要的主机名)
+```
+
+#### 生成对应的hosts
+
+```
+vim /etc/hosts
+--------------------
+127.0.0.1	localhost
+::1			localhost
+127.0.1.1	archlinux.localdomain archlinux   # 这里的archlinux是主机名
+```
+
+### 安装相关包
+
+```
+pacman -S grub efibootmgr efivar networkmanager intel-ucode
+```
+
+### 配置grub
+
+```
+grub-install /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+### 激活启用NetworkManager
+
+```
+systemctl enable NetworkManager
+```
+
+### 给root用户建立密码
+
+```
+passwd
+输入密码
+```
+
+## 重启
+
+```
+exit
+
+umount /mnt/boot/efi
+umount /mnt
+
+reboot
+```
+
+## 基本配置
+
+### 再次联网
+
+输入`nmtui` 选择 “Activate a connection” 回车进入，选择你需要的网络，连接后back返回即可
+
+### 配置bash shell环境变量
+
+```
+vim /etc/skel/.bashrc
+-------------------------------
+# 在alias行上面添加
+export EDITOR=vim
+
+# 继续添加
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+
+# 在alias 之后添加脚本
+[ ! -e ~/.dircolors ] && eval $(dircolors -p > ~/.dircolors)
+[ -e /bin/dircolors ] && eval $(dircolors -b ~/.dircolors)
+# 保存退出
+```
+
+随后将上述文件复制到home目录下
+
+```
+cp /etc/skel/.bashrc ~
+```
+
+### 添加标准用户(以下klelee是我的用户名)
+
+```
+# 添加用户
+useradd --create-home klelee
+# 设置密码
+passwd klelee
+```
+
+#### 设置用户组
+
+```
+usermod -aG wheel,users,storage,power,lp,adm,optical klelee
+```
+
+#### 修改当前用户权限
+
+```
+visudo
+---------------------------------
+# 取消注释以下行
+%wheel ALL=(ALL) ALL
+```
+
+### 图形界面
+
+#### 显示服务
+
+```
+pacman -S xorg
+```
+
+#### 安装字体
+
+```
+# 英文字体
+pacman -S ttf-dejavu ttf-droid ttf-hack ttf-font-awesome otf-font-awesome ttf-lato ttf-liberation ttf-linux-libertine ttf-opensans ttf-roboto ttf-ubuntu-font-family
+```
+
+```
+# 中文字体
+pacman -S ttf-hannom noto-fonts noto-fonts-extra noto-fonts-emoji noto-fonts-cjk adobe-source-code-pro-fonts adobe-source-sans-fonts adobe-source-serif-fonts adobe-source-han-sans-cn-fonts adobe-source-han-sans-hk-fonts adobe-source-han-sans-tw-fonts adobe-source-han-serif-cn-fonts wqy-zenhei wqy-microhei
+```
+
+#### 打开字体引擎
+
+```
+vim /etc/profile.d/freetype2.sh
+--------------------------------------------
+# 取消注释最后一句
+export FREETYPE_PROPERTIES="truetype:interpreter-version=40"
+```
+
+#### 显卡驱动
+
+```
+pacman -S xf86-video-intel vukan-intel mesa
+```
+
+### 声卡配置
+
+```
+pacman -S alsa-utils pulseaudio pulseaudio-bluetooth cups
+```
+
+### 清理缓存
+
+```
+pacman -Sc
+```
+
