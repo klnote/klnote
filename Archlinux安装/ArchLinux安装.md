@@ -47,6 +47,12 @@ password:输入密码
 # ping baidu.com
 ```
 
+### 更新为国内镜像源
+
+`reflector --country China --age 72 --sort rate --protocol https --save /etc/pacman.d/mirrorlist`
+
+已将最新的镜像源更新为国内的，保存在/etc/pacman.d/mirrorlist目录下
+
 ### 更新系统时间
 
 ` timedatectl set-ntp true ` 之后可以使用 ` timedatectl status `检查服务状态
@@ -69,11 +75,6 @@ password:输入密码
 
    ​	当然也可以使用Android和ios设备，这里不说了，因为那玩意太小了，用来输入命令实在鸡肋
 
-### 更新为国内镜像源
-
-`reflector --country China --age 72 --sort rate --protocol https --save /etc/pacman.d/mirrorlist`
-
-已将最新的镜像源更新为国内的，保存在/etc/pacman.d/mirrorlist目录下
 
 ### 磁盘分区
 
@@ -116,7 +117,8 @@ mkfs.vfat /dev/sda1
 #### root分区格式化
 
 ```
-mkfs.xfs /dev/sda3
+mkfs.xfs -f /dev/sda3
+# 强制分区为xfs
 ```
 
 #### 创建swap分区
@@ -147,6 +149,8 @@ pacstrap /mnt linux linux-firmware linux-headers base base-devel vim git bash-co
 
 ```
 genfstab -U /mnt >> /mnt/etc/fstab
+```
+```
 cat /mnt/etc/fstab
 ```
 
@@ -160,6 +164,8 @@ arch-chroot /mnt
 
 ```
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+```
+```
 hwclock --systohc
 ```
 
@@ -185,8 +191,11 @@ locale-gen
 ```
 
 #### 设置本地语言环境变量
-
-编辑`/etc/locale.conf` 在里面写入：`LANG=en_US.UTF-8`
+```
+/etc/locale.conf
+-------------------------
+LANG=en_US.UTF-8
+```
 
 ### 网络配置
 
@@ -218,6 +227,8 @@ pacman -S grub efibootmgr efivar networkmanager intel-ucode
 
 ```
 grub-install /dev/sda
+```
+```
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
@@ -310,7 +321,7 @@ vim /etc/pacman.conf
 --------------------------------------
 # 在最后添加
 [archlinuxcn]
-Server = https://ustc.edu.cn/archlinuxcn/$arch   
+Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch   
 # 这是中科大的源，你也可以选择清华、阿里等，当我推荐中科大，因为我喜欢
 ```
 
@@ -323,56 +334,42 @@ pacman -S archlinuxcn-keyring
 **注** ： 如果以上更新密钥步骤出现错误，就是那种连着一串ERROR的情况，请执行以下步骤
 
 ```
-rm -rf /etc/pacman.c/gnupg
-pacman-key --init
-pacman-key --populate archlinux archlinuxcn
-pacman -Syy
+# rm -rf /etc/pacman.c/gnupg
+# pacman-key --init
+# pacman-key --populate archlinux archlinuxcn
+# pacman -Syy
 ```
 
 OK！
 
+### 显卡驱动
+```
+pacman -S xf86-video-intel vulkan-intel mesa
+```
+
 ### 声卡配置
-
 ```
-pacman -S alsa-utils pulseaudio pulseaudio-bluetooth cups
+# pacman -S alsa-utils pulseaudio pulseaudio-bluetooth cups
 ```
-
-### 清理缓存
-
-```
-pacman -Sc
-```
-
-### 启用每周自动清理pacman缓存
-
-```
-sudo systemctl enable paccache.timer
-```
-
-
 
 ### 图形界面
 
 #### 显示服务
-
 ```
 pacman -S xorg
 ```
 
 #### 安装字体
-
+##### 英文字体
 ```
-# 英文字体
 pacman -S ttf-dejavu ttf-droid ttf-hack ttf-font-awesome otf-font-awesome ttf-lato ttf-liberation ttf-linux-libertine ttf-opensans ttf-roboto ttf-ubuntu-font-family
 ```
-
+##### 中文字体
 ```
-# 中文字体
 pacman -S ttf-hannom noto-fonts noto-fonts-extra noto-fonts-emoji noto-fonts-cjk adobe-source-code-pro-fonts adobe-source-sans-fonts adobe-source-serif-fonts adobe-source-han-sans-cn-fonts adobe-source-han-sans-hk-fonts adobe-source-han-sans-tw-fonts adobe-source-han-serif-cn-fonts wqy-zenhei wqy-microhei
 ```
 
 #### 打开字体引擎
-
 ```
 vim /etc/profile.d/freetype2.sh
 --------------------------------------------
@@ -380,9 +377,7 @@ vim /etc/profile.d/freetype2.sh
 export FREETYPE_PROPERTIES="truetype:interpreter-version=40"
 ```
 
-#### 显卡驱动
-
+### 清理缓存
 ```
-pacman -S xf86-video-intel vulkan-intel mesa
+pacman -Scc
 ```
-
