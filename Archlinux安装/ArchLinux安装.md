@@ -383,6 +383,6 @@ export FREETYPE_PROPERTIES="truetype:interpreter-version=40"
 #### 显卡驱动
 
 ```
-pacman -S xf86-video-intel vukan-intel mesa
+pacman -S xf86-video-intel vulkan-intel mesa
 ```
 
