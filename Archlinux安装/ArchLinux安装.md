@@ -96,7 +96,7 @@ root分区		剩余空间
 
 这里输入300M，之后回车，就回到上面的界面了。
 
-![](C:\Users\klelee\Desktop\klnote\Archlinux安装\EFI分区300M.png)
+![](EFI分区300M.png)
 
 在建立下一个分区之前，先对第一个EFI分区的类型做一个修改，选择type选项
 
