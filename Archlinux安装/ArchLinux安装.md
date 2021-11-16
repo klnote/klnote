@@ -262,6 +262,45 @@ reboot
 
 输入`nmtui` 选择 “Activate a connection” 回车进入，选择你需要的网络，连接后back返回即可
 
+### 再次ssh连接
+
+#### 安装openssh
+
+```
+pacman -S openssh
+```
+
+#### 启动ssh服务
+
+```
+systemctl start sshd
+```
+
+#### 查看当前ip地址
+
+```
+ip -brief address
+```
+
+#### 修改ssh配置
+
+ssh默认无法连接root用户，需要修改其配置文件使其支持
+
+```
+vim /etc/ssh/sshd_config
+--------------------------------------
+# 将下列的语句值改为yes
+PermitRootLogin yes
+```
+
+![](sshd_config_p.png)
+
+#### 在其他端进行连接
+
+```
+ssh -o StrictHostKeyChecking=no root@<刚刚查看的IP地址>
+```
+
 ### 配置bash shell环境变量
 
 ```
@@ -339,8 +378,6 @@ pacman -S archlinuxcn-keyring
 # pacman-key --populate archlinux archlinuxcn
 # pacman -Syy
 ```
-
-OK！
 
 ### 显卡驱动
 ```
