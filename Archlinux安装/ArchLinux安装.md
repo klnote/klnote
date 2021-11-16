@@ -389,19 +389,19 @@ pacman -S xf86-video-intel vulkan-intel mesa
 # pacman -S alsa-utils pulseaudio pulseaudio-bluetooth cups
 ```
 
-### 图形界面
+## 图形界面
 
-#### 显示服务
+### 显示服务
 ```
 pacman -S xorg
 ```
 
-#### 安装字体
-##### 英文字体
+### 安装字体
+#### 英文字体
 ```
 pacman -S ttf-dejavu ttf-droid ttf-hack ttf-font-awesome otf-font-awesome ttf-lato ttf-liberation ttf-linux-libertine ttf-opensans ttf-roboto ttf-ubuntu-font-family
 ```
-##### 中文字体
+#### 中文字体
 ```
 pacman -S ttf-hannom noto-fonts noto-fonts-extra noto-fonts-emoji noto-fonts-cjk adobe-source-code-pro-fonts adobe-source-sans-fonts adobe-source-serif-fonts adobe-source-han-sans-cn-fonts adobe-source-han-sans-hk-fonts adobe-source-han-sans-tw-fonts adobe-source-han-serif-cn-fonts wqy-zenhei wqy-microhei
 ```
@@ -414,7 +414,84 @@ vim /etc/profile.d/freetype2.sh
 export FREETYPE_PROPERTIES="truetype:interpreter-version=40"
 ```
 
+### 安装桌面环境（KDE）
+
+#### KDE
+
+```
+pacman -S plasma sddm konsole dolphin kate ark okular spectacle yay
+```
+
+plasma：就是桌面环境
+
+sddm：登录管理器
+
+konsole：kde下的终端
+
+kate：文本编辑器
+
+ark：解压与压缩
+
+okular：PDF查看器
+
+spectacle：截图工具
+
+AUR：管理工具
+
+#### 设置sddm登录
+
+```
+systemctl enable sddm
+```
+
+## 常用软件
+
+### 中文输入法
+
+```
+# sudo pacman -S fcitx fcitx-im fcitx-configtool
+```
+
+```
+yay -S fcitx-sogoupinyin
+```
+
+```
+vim ~/.xprofile
+-------------------------------
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS="@im=fcitx"
+```
+
+重启，这时候会看到系统托盘会有一个键盘的图标，我已经配置过了，这里显示的是sogou的图标
+
+![](fcitx.png)
+
+右击那个图标，点击configure,在配置界面点加号
+
+![](fcitx_configure.png)
+
+去掉“只显示当前语言”的选项，拉倒最下面选择sogoupinyin，之后回到上面的页面，选择美式键盘，删掉即可
+
+![](fcitx_1.png)
+
+### 其他软件
+
+```
+sudo pacman -S typora visual-studio-code-bin netease-cloud-music
+yay -S baidunetdisk-electron google-chrome qv2ray 
+```
+
+更多软件可以去wiki寻找。
+
+[archlinux wiki](https://wiki.archlinux.org/title/Main_page_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87))
+
+[List of applications](https://wiki.archlinux.org/title/List_of_applications_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87))
+
 ### 清理缓存
+
 ```
 pacman -Scc
 ```
+
